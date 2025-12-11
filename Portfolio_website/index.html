@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Sadman — Portfolio</title>
+    <meta name="description" content="Portfolio of Sadman — Web Developer, Designer, and Problem Solver." />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="container header-inner">
+        <a class="logo" href="#">Sadman</a>
+        <nav class="nav">
+          <a href="#about">About</a>
+          <a href="#projects">Projects</a>
+          <a href="#skills">Skills</a>
+          <a href="#contact">Contact</a>
+          <a href="inventory.html">Inventory</a>
+        </nav>
+        <a class="btn-outline" href="#contact">Hire Me</a>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div class="container hero-grid">
+          <div class="hero-text">
+            <h1>Hi, I'm <span class="accent">Sadman</span></h1>
+            <p class="lead">A front-end developer who builds accessible, performant web experiences. I design UI and implement responsive, maintainable code.</p>
+            <div class="hero-cta">
+              <a class="btn" href="#projects">See Projects</a>
+              <a class="btn-light" href="resume.pdf" download>Download Resume</a>
+            </div>
+            <ul class="social-inline">
+              <li><a href="https://github.com/sadman2084" aria-label="GitHub">GitHub</a></li>
+              <li><a href="https://www.linkedin.com/in/md-sadman-kabir-414b4b270/" aria-label="LinkedIn">LinkedIn</a></li>
+              <!-- <li><a href="#" aria-label="Twitter">Twitter</a></li> -->
+            </ul>
+          </div>
+          <div class="hero-photo">
+            <img src="https://via.placeholder.com/320x320.png?text=Your+Photo" alt="Your portrait" />
+          </div>
+        </div>
+      </section>
+
+      <section id="about" class="section container">
+        <h2>About Me</h2>
+        <p>I build web applications and user interfaces with attention to accessibility, performance and delightful UX. I enjoy turning design into code and solving product problems.</p>
+        <div class="about-grid">
+          <div>
+            <h3>Experience</h3>
+            <p>3+ years building web apps using HTML, CSS, JavaScript, and modern frameworks.</p>
+          </div>
+          <div>
+            <h3>Education</h3>
+            <p>Degree or relevant coursework — University or Bootcamp.</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="skills" class="section container">
+        <h2>Skills</h2>
+        <div class="skills-grid">
+          <div class="skill">
+            <h4>HTML & CSS</h4>
+            <div class="progress"><div style="width:95%"></div></div>
+          </div>
+          <div class="skill">
+            <h4>JavaScript</h4>
+            <div class="progress"><div style="width:85%"></div></div>
+          </div>
+          <div class="skill">
+            <h4>React / Frameworks</h4>
+            <div class="progress"><div style="width:80%"></div></div>
+          </div>
+          <div class="skill">
+            <h4>Design & Prototyping</h4>
+            <div class="progress"><div style="width:70%"></div></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="projects" class="section container">
+        <h2>Projects</h2>
+        <p>Selected work — click to view live demos or code.</p>
+        <div class="projects-grid">
+          <article class="project">
+            <img src="https://via.placeholder.com/600x360.png?text=Project+1" alt="Project 1 screenshot" />
+            <div class="project-body">
+              <h3>Project One</h3>
+              <p>Short description of the project, tech used, and outcome.</p>
+              <p class="project-links"><a href="#">Live</a> · <a href="#">Code</a></p>
+            </div>
+          </article>
+
+          <article class="project">
+            <img src="https://via.placeholder.com/600x360.png?text=Project+2" alt="Project 2 screenshot" />
+            <div class="project-body">
+              <h3>Project Two</h3>
+              <p>Short description of the project, tech used, and outcome.</p>
+              <p class="project-links"><a href="#">Live</a> · <a href="#">Code</a></p>
+            </div>
+          </article>
+
+          <article class="project">
+            <img src="https://via.placeholder.com/600x360.png?text=Project+3" alt="Project 3 screenshot" />
+            <div class="project-body">
+              <h3>Project Three</h3>
+              <p>Short description of the project, tech used, and outcome.</p>
+              <p class="project-links"><a href="#">Live</a> · <a href="#">Code</a></p>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section id="contact" class="section container contact-section">
+        <h2>Contact</h2>
+        <p>I'm available for freelance or full-time work. Reach out and let's talk.</p>
+        <div class="contact-grid">
+          <form class="contact-form" action="mailto:you@example.com" method="post" enctype="text/plain">
+            <label for="name">Name</label>
+            <input id="name" name="name" type="text" required />
+
+            <label for="email">Email</label>
+            <input id="email" name="email" type="email" required />
+
+            <label for="message">Message</label>
+            <textarea id="message" name="message" rows="6" required></textarea>
+
+            <div class="form-actions">
+              <button class="btn" type="submit">Send</button>
+              <button class="btn-outline" type="reset">Reset</button>
+            </div>
+          </form>
+
+          <aside class="contact-info">
+            <h3>Other ways to reach me</h3>
+            <p><strong>Email:</strong> <a href="mailto:sadmankabir897@gmail.com">sadmankabir897@gmail.com</a></p>
+            <p><strong>Phone:</strong> +88 01539568935</p>
+            <p><strong>Location:</strong> Dhaka, Bangladesh</p>
+            <p>Or find me on: <a href="https://github.com/sadman2084">GitHub</a>, <a href="https://www.linkedin.com/in/md-sadman-kabir-414b4b270/">LinkedIn</a></p>
+          </aside>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-inner">
+        <p>© <span id="year"></span> Your Name. Built with care.</p>
+        <nav class="footer-nav">
+          <a href="#">Privacy</a>
+          <a href="#">Terms</a>
+        </nav>
+      </div>
+    </footer>
+
+    <script>
+      // Set current year
+      document.getElementById('year').textContent = new Date().getFullYear();
+    </script>
+  </body>
+</html>
