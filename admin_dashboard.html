@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: #f5f7fa;
+            color: #333;
+        }
+
+        header {
+            background: white;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h1 {
+            font-size: 1.5rem;
+            color: #667eea;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .user-info {
+            text-align: right;
+        }
+
+        .user-info .username {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .user-info .email {
+            font-size: 0.9rem;
+            color: #999;
+        }
+
+        .logout-btn {
+            padding: 10px 20px;
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background: #ff5252;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 30px 20px;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card h2 {
+            font-size: 1.3rem;
+            margin-bottom: 10px;
+            color: #667eea;
+        }
+
+        .card p {
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            margin-top: 15px;
+            transition: background 0.3s ease;
+            border: none;
+            cursor: pointer;
+            font-size: 0.95rem;
+        }
+
+        .btn:hover {
+            background: #5568d3;
+        }
+
+        .welcome-section {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+
+        .welcome-section h2 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .welcome-section p {
+            color: #666;
+            line-height: 1.8;
+        }
+
+        @media (max-width: 768px) {
+            header {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+
+            .header-right {
+                flex-direction: column;
+                width: 100%;
+            }
+
+            .user-info {
+                text-align: center;
+            }
+
+            .logout-btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>🔐 Admin Dashboard</h1>
+        <div class="header-right">
+            <div class="user-info">
+                <div class="username" id="username">Loading...</div>
+                <div class="email" id="email">Loading...</div>
+            </div>
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="welcome-section">
+            <h2>Welcome to Your Admin Panel</h2>
+            <p>You have successfully logged in. From here, you can manage your portfolio content, view analytics, and update your projects. Use the options below to get started.</p>
+        </div>
+
+        <div class="dashboard-grid">
+            <div class="card">
+                <h2>📝 Manage Projects</h2>
+                <p>Add, edit, or delete your portfolio projects. Update project descriptions, images, and links.</p>
+                <a href="manage_projects.html" class="btn">Manage Projects</a>
+            </div>
+
+            <div class="card">
+                <h2>👤 Profile Settings</h2>
+                <p>Update your profile information, bio, contact details, and social media links.</p>
+                <a href="profile_settings.html" class="btn">Edit Profile</a>
+            </div>
+
+            <div class="card">
+                <h2>📊 Analytics</h2>
+                <p>View detailed analytics about your portfolio visitors and project engagement.</p>
+                <button class="btn" onclick="alert('Coming soon!')">View Analytics</button>
+            </div>
+
+            <div class="card">
+                <h2>💬 Messages</h2>
+                <p>Read and manage messages from visitors who have contacted you through your portfolio.</p>
+                <a href="messages.html" class="btn">View Messages</a>
+            </div>
+
+            <div class="card">
+                <h2>⚙️ Settings</h2>
+                <p>Configure general settings, security options, and preferences for your admin panel.</p>
+                <button class="btn" onclick="alert('Coming soon!')">Go to Settings</button>
+            </div>
+
+            <div class="card">
+                <h2>📚 Help & Support</h2>
+                <p>Access documentation, FAQs, and contact support for any issues or questions.</p>
+                <button class="btn" onclick="alert('Coming soon!')">Get Help</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Load admin info from localStorage (set by admin.html)
+        window.addEventListener('DOMContentLoaded', () => {
+            const username = localStorage.getItem('admin_username') || 'Admin';
+            const email = localStorage.getItem('admin_email') || 'admin@example.com';
+            
+            document.getElementById('username').textContent = username;
+            document.getElementById('email').textContent = email;
+        });
+
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                // Clear session data
+                localStorage.removeItem('admin_username');
+                localStorage.removeItem('admin_email');
+                
+                // Redirect to login page
+                window.location.href = 'login.html';
+            }
+        }
+    </script>
+</body>
+</html>

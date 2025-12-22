@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Messages — Admin Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: #f5f7fa;
+            color: #333;
+        }
+
+        header {
+            background: white;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h1 {
+            font-size: 1.5rem;
+            color: #667eea;
+        }
+
+        .header-right {
+            display: flex;
+            gap: 15px;
+        }
+
+        .back-btn, .logout-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .back-btn:hover {
+            background: #e0e0e0;
+        }
+
+        .logout-btn {
+            background: #ff6b6b;
+            color: white;
+        }
+
+        .logout-btn:hover {
+            background: #ff5252;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 30px 20px;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .page-header h2 {
+            font-size: 1.8rem;
+            color: #333;
+        }
+
+        .stats {
+            display: flex;
+            gap: 20px;
+        }
+
+        .stat-badge {
+            background: white;
+            padding: 10px 20px;
+            border-radius: 6px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .stat-badge .number {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-badge .label {
+            font-size: 0.85rem;
+            color: #999;
+            margin-top: 5px;
+        }
+
+        .message {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+            font-weight: 500;
+        }
+
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            display: block;
+        }
+
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            display: block;
+        }
+
+        .messages-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .message-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            border-left: 4px solid #667eea;
+            transition: all 0.3s ease;
+        }
+
+        .message-card.unread {
+            border-left-color: #ff6b6b;
+            background: #fffaf7;
+        }
+
+        .message-card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .message-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 12px;
+        }
+
+        .message-from {
+            flex: 1;
+        }
+
+        .message-name {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .message-email {
+            font-size: 0.9rem;
+            color: #999;
+        }
+
+        .message-date {
+            font-size: 0.85rem;
+            color: #999;
+            white-space: nowrap;
+        }
+
+        .unread-badge {
+            background: #ff6b6b;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+
+        .message-text {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 15px;
+            padding: 12px;
+            background: #f9f9f9;
+            border-radius: 6px;
+            border-left: 3px solid #667eea;
+        }
+
+        .message-actions {
+            display: flex;
+            gap: 10px;
+            border-top: 1px solid #f0f0f0;
+            padding-top: 12px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-read {
+            background: #667eea;
+            color: white;
+            flex: 1;
+        }
+
+        .btn-read:hover {
+            background: #5568d3;
+        }
+
+        .btn-delete {
+            background: #ff6b6b;
+            color: white;
+            flex: 1;
+        }
+
+        .btn-delete:hover {
+            background: #ff5252;
+        }
+
+        .btn-reply {
+            background: #4caf50;
+            color: white;
+            flex: 1;
+        }
+
+        .btn-reply:hover {
+            background: #45a049;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+
+        .empty-state-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+
+        .filter-section {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .filter-btn {
+            padding: 8px 16px;
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .filter-btn.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        @media (max-width: 768px) {
+            header {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .page-header {
+                flex-direction: column;
+                gap: 15px;
+                align-items: start;
+            }
+
+            .stats {
+                width: 100%;
+                flex-wrap: wrap;
+            }
+
+            .message-header {
+                flex-direction: column;
+            }
+
+            .message-actions {
+                flex-direction: column;
+            }
+
+            .unread-badge {
+                margin-left: 0;
+                margin-top: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>💬 Messages</h1>
+        <div class="header-right">
+            <button class="back-btn" onclick="goBack()">← Back to Dashboard</button>
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="page-header">
+            <h2>Contact Form Messages</h2>
+            <div class="stats">
+                <div class="stat-badge">
+                    <div class="number" id="total-count">0</div>
+                    <div class="label">Total Messages</div>
+                </div>
+                <div class="stat-badge">
+                    <div class="number" id="unread-count">0</div>
+                    <div class="label">Unread</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="message" class="message"></div>
+
+        <div class="filter-section">
+            <button class="filter-btn active" onclick="filterMessages('all')">All Messages</button>
+            <button class="filter-btn" onclick="filterMessages('unread')">Unread Only</button>
+            <button class="filter-btn" onclick="deleteAllMessages()">Delete All</button>
+        </div>
+
+        <div class="messages-list" id="messages-container">
+            <div class="empty-state">
+                <div class="empty-state-icon">📬</div>
+                <p>No messages yet. Visitors will see your contact form here.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let allMessages = [];
+        let currentFilter = 'all';
+
+        // Load messages on page load
+        window.addEventListener('DOMContentLoaded', loadMessages);
+
+        // Load messages from database
+        async function loadMessages() {
+            try {
+                const response = await fetch('get_messages.php');
+                const data = await response.json();
+
+                if (data.success) {
+                    allMessages = data.messages;
+                    document.getElementById('total-count').textContent = data.total_count;
+                    document.getElementById('unread-count').textContent = data.unread_count;
+                    displayMessages();
+                } else {
+                    showMessage('Failed to load messages', 'error');
+                }
+            } catch (error) {
+                console.error('Error loading messages:', error);
+                showMessage('Error loading messages', 'error');
+            }
+        }
+
+        // Display messages based on filter
+        function displayMessages() {
+            const container = document.getElementById('messages-container');
+
+            let messagesToDisplay = allMessages;
+            if (currentFilter === 'unread') {
+                messagesToDisplay = allMessages.filter(msg => msg.read_status === 0);
+            }
+
+            if (messagesToDisplay.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📭</div>
+                        <p>${currentFilter === 'unread' ? 'No unread messages.' : 'No messages yet.'}</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = messagesToDisplay.map(msg => `
+                <div class="message-card ${msg.read_status === 0 ? 'unread' : ''}">
+                    <div class="message-header">
+                        <div class="message-from">
+                            <div class="message-name">${msg.name}</div>
+                            <div class="message-email">${msg.email}</div>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <span class="message-date">${msg.formatted_date}</span>
+                            ${msg.read_status === 0 ? '<span class="unread-badge">NEW</span>' : ''}
+                        </div>
+                    </div>
+                    <div class="message-text">${escapeHtml(msg.message)}</div>
+                    <div class="message-actions">
+                        ${msg.read_status === 0 ? `<button class="btn btn-read" onclick="markAsRead(${msg.id})">✓ Mark as Read</button>` : '<button class="btn btn-read" style="opacity: 0.6;" disabled>✓ Read</button>'}
+                        <button class="btn btn-reply" onclick="replyToMessage('${msg.email}', '${msg.name}')">↩️ Reply</button>
+                        <button class="btn btn-delete" onclick="deleteMessage(${msg.id})">🗑️ Delete</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Filter messages
+        function filterMessages(filter) {
+            currentFilter = filter;
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            displayMessages();
+        }
+
+        // Mark message as read
+        async function markAsRead(id) {
+            try {
+                const response = await fetch('mark_message_read.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id })
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    loadMessages();
+                } else {
+                    showMessage('Failed to mark message as read', 'error');
+                }
+            } catch (error) {
+                showMessage('Error marking message', 'error');
+            }
+        }
+
+        // Delete message
+        async function deleteMessage(id) {
+            if (!confirm('Are you sure you want to delete this message?')) return;
+
+            try {
+                const response = await fetch('delete_message.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id })
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    showMessage('Message deleted successfully', 'success');
+                    setTimeout(loadMessages, 1000);
+                } else {
+                    showMessage('Failed to delete message', 'error');
+                }
+            } catch (error) {
+                showMessage('Error deleting message', 'error');
+            }
+        }
+
+        // Delete all messages
+        function deleteAllMessages() {
+            if (!confirm('Are you sure you want to delete ALL messages? This cannot be undone.')) return;
+
+            // Delete each message
+            const deletePromises = allMessages.map(msg =>
+                fetch('delete_message.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id: msg.id })
+                })
+            );
+
+            Promise.all(deletePromises).then(() => {
+                showMessage('All messages deleted successfully', 'success');
+                setTimeout(loadMessages, 1000);
+            }).catch(() => {
+                showMessage('Error deleting messages', 'error');
+            });
+        }
+
+        // Reply to message
+        function replyToMessage(email, name) {
+            const subject = `Re: Message from ${name}`;
+            const mailtoLink = `mailto:${email}?subject=${encodeURIComponent(subject)}`;
+            window.location.href = mailtoLink;
+        }
+
+        // Show message
+        function showMessage(text, type) {
+            const messageDiv = document.getElementById('message');
+            messageDiv.textContent = text;
+            messageDiv.className = 'message ' + type;
+            setTimeout(() => {
+                messageDiv.className = 'message';
+            }, 5000);
+        }
+
+        // Escape HTML
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Go back to dashboard
+        function goBack() {
+            window.location.href = 'admin_dashboard.html';
+        }
+
+        // Logout
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                localStorage.removeItem('admin_username');
+                localStorage.removeItem('admin_email');
+                localStorage.removeItem('admin_id');
+                window.location.href = 'login.html';
+            }
+        }
+    </script>
+</body>
+</html>
