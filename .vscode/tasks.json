@@ -2,14 +2,24 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "Auto Git Push",
-      "type": "shell",
-      "command": "bash autopush.sh",
-      "presentation": {
-        "reveal": "always",
-        "panel": "new"
-      },
-      "problemMatcher": []
+        "label": "Auto Git Push",
+        "type": "shell",
+        "command": "C:\\Program Files\\Git\\bin\\bash.exe",
+        "args": [
+            "autopush.sh"
+        ],
+        "options": {
+            "cwd": "${workspaceFolder}"
+        },
+        "presentation": {
+            "reveal": "always",
+            "panel": "new"
+        },
+        "problemMatcher": [],
+        "group": {
+            "kind": "build",
+            "isDefault": true
+        }
     }
-  ]
+]
 }
