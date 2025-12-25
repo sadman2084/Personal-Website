@@ -141,14 +141,35 @@ function updateQuantity() {
     }
     
     $id = (int)$input['id'];
-    $quantity = (int)$input['quantity'];
+    $delta = (int)$input['quantity'];
     
-    // Ensure quantity is at least 1
-    if ($quantity < 1) {
-        $quantity = 1;
+    // First get current quantity
+    $getSql = "SELECT quantity FROM hardware_inventory WHERE id = ?";
+    $getStmt = $conn->prepare($getSql);
+    $getStmt->bind_param("i", $id);
+    $getStmt->execute();
+    $result = $getStmt->get_result();
+    
+    if ($result->num_rows === 0) {
+        http_response_code(404);
+        echo json_encode(['error' => 'Item not found']);
+        $getStmt->close();
+        return;
     }
     
-    // Prepare statement
+    $row = $result->fetch_assoc();
+    $currentQty = (int)$row['quantity'];
+    $getStmt->close();
+    
+    // Calculate new quantity
+    $newQty = $currentQty + $delta;
+    
+    // Ensure quantity is at least 1
+    if ($newQty < 1) {
+        $newQty = 1;
+    }
+    
+    // Update with new quantity
     $sql = "UPDATE hardware_inventory SET quantity = ? WHERE id = ?";
     $stmt = $conn->prepare($sql);
     
@@ -159,16 +180,11 @@ function updateQuantity() {
     }
     
     // Bind parameters
-    $stmt->bind_param("ii", $quantity, $id);
+    $stmt->bind_param("ii", $newQty, $id);
     
     // Execute
     if ($stmt->execute()) {
-        if ($stmt->affected_rows > 0) {
-            echo json_encode(['success' => true, 'message' => 'Quantity updated']);
-        } else {
-            http_response_code(404);
-            echo json_encode(['error' => 'Item not found']);
-        }
+        echo json_encode(['success' => true, 'message' => 'Quantity updated', 'new_quantity' => $newQty]);
     } else {
         http_response_code(500);
         echo json_encode(['error' => 'Execute failed: ' . $stmt->error]);
@@ -308,13 +324,16 @@ function editItem() {
         return;
     }
     
-    // Bind parameters dynamically - need to pass by reference for binary data
-    $bindParams = array_merge([$types], $params);
+    // Bind parameters dynamically - need to pass by reference
+    $bindParams = [$types];
+    foreach ($params as $key => $value) {
+        $bindParams[] = &$params[$key];
+    }
     call_user_func_array([$stmt, 'bind_param'], $bindParams);
     
     // Execute
     if ($stmt->execute()) {
-        if ($stmt->affected_rows > 0) {
+        if ($stmt->affected_rows > 0 || $stmt->affected_rows === 0) {
             echo json_encode(['success' => true, 'message' => 'Item updated']);
         } else {
             http_response_code(404);

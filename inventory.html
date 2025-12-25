@@ -21,15 +21,18 @@
     <main>
       <section class="hero-inventory">
         <div class="container">
+          <div class="hero-badge">🔧 Hardware Management</div>
           <h1>Arduino Hardware Inventory</h1>
-          <p>Manage your hardware components, track quantities, and keep detailed records.</p>
+          <p>Manage your hardware components, track quantities, and keep detailed records with ease.</p>
         </div>
       </section>
 
       <section class="container inventory-section">
         <div class="section-header">
-          <h2>Your Hardware</h2>
-          <button class="btn" id="addItemBtn">+ Add New Item</button>
+          <div class="section-title-wrapper">
+            <h2>Your Hardware</h2>
+            <p class="section-subtitle">Browse Arduino components inventory</p>
+          </div>
         </div>
 
         <div class="inventory-grid" id="inventoryGrid">
@@ -38,141 +41,12 @@
 
         <!-- Empty state -->
         <div class="empty-state" id="emptyState">
-          <p>No hardware items yet. Add your first Arduino component!</p>
+          <div class="empty-icon">📦</div>
+          <h3>No Hardware Items Yet</h3>
+          <p>The inventory is currently empty. Check back later!</p>
         </div>
       </section>
 
-      <!-- Add Item Modal -->
-      <div class="modal" id="addItemModal">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h2>Add New Hardware Item</h2>
-            <button class="close-btn" id="closeModalBtn">&times;</button>
-          </div>
-          <form class="add-form" id="addForm">
-            <div class="form-group">
-              <label for="itemName">Item Name *</label>
-              <input
-                id="itemName"
-                name="name"
-                type="text"
-                placeholder="e.g., Arduino Uno"
-                required
-              />
-            </div>
-
-            <div class="form-group">
-              <label for="itemQuantity">Quantity *</label>
-              <input
-                id="itemQuantity"
-                name="quantity"
-                type="number"
-                min="1"
-                value="1"
-                required
-              />
-            </div>
-
-            <div class="form-group">
-              <label for="itemDescription">Description</label>
-              <textarea
-                id="itemDescription"
-                name="description"
-                placeholder="e.g., Microcontroller board with USB connection"
-                rows="3"
-              ></textarea>
-            </div>
-
-            <div class="form-group">
-              <label for="itemImage">Image *</label>
-              <p class="help-text">Upload an image of your hardware (JPG, PNG)</p>
-              <div class="image-upload-area" id="imageUploadArea">
-                <input
-                  id="itemImage"
-                  name="image"
-                  type="file"
-                  accept="image/*"
-                  required
-                />
-                <p>Click to upload or drag and drop</p>
-              </div>
-              <img id="imagePreview" alt="Preview" style="display: none" />
-            </div>
-
-            <div class="form-actions">
-              <button class="btn" type="submit">Add Item</button>
-              <button class="btn-outline" type="button" id="cancelBtn">Cancel</button>
-            </div>
-          </form>
-        </div>
-      </div>
-
-      <!-- Edit Item Modal -->
-      <div class="modal" id="editItemModal">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h2>Edit Hardware Item</h2>
-            <button class="close-btn" id="closeEditModalBtn">&times;</button>
-          </div>
-          <form class="edit-form" id="editForm">
-            <input type="hidden" id="editItemId" name="id" />
-            
-            <div class="form-group">
-              <label for="editItemName">Item Name *</label>
-              <input
-                id="editItemName"
-                name="name"
-                type="text"
-                placeholder="e.g., Arduino Uno"
-                required
-              />
-            </div>
-
-            <div class="form-group">
-              <label for="editItemQuantity">Quantity *</label>
-              <input
-                id="editItemQuantity"
-                name="quantity"
-                type="number"
-                min="1"
-                value="1"
-                required
-              />
-            </div>
-
-            <div class="form-group">
-              <label for="editItemDescription">Description</label>
-              <textarea
-                id="editItemDescription"
-                name="description"
-                placeholder="e.g., Microcontroller board with USB connection"
-                rows="3"
-              ></textarea>
-            </div>
-
-            <div class="form-group">
-              <label for="editItemImage">Image</label>
-              <p class="help-text">Upload a new image to replace the current one (optional)</p>
-              <div class="image-upload-area" id="editImageUploadArea">
-                <input
-                  id="editItemImage"
-                  name="image"
-                  type="file"
-                  accept="image/*"
-                />
-                <p>Click to upload or drag and drop</p>
-              </div>
-              <img id="editImagePreview" alt="Preview" style="display: none" />
-              <p class="help-text" id="currentImageText" style="margin-top: 10px;">Current image will be kept if not changed</p>
-            </div>
-
-            <div class="form-actions">
-              <button class="btn" type="submit">Save Changes</button>
-              <button class="btn-outline" type="button" id="cancelEditBtn">Cancel</button>
-            </div>
-          </form>
-        </div>
-      </div>
     </main>
 
     <footer class="site-footer">
@@ -181,6 +55,6 @@
       </div>
     </footer>
 
-    <script src="inventory-script.js"></script>
+    <script src="inventory-view-only.js"></script>
   </body>
 </html>

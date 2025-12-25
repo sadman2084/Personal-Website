@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Admin - Manage Inventory</title>
+    <meta name="description" content="Admin panel for managing Arduino hardware inventory." />
+    <link rel="stylesheet" href="inventory-style.css" />
+    <style>
+      .admin-header {
+        background: linear-gradient(135deg, rgba(124, 58, 237, 0.1), rgba(6, 182, 212, 0.1));
+        padding: 1rem 0;
+        border-bottom: 1px solid rgba(124, 58, 237, 0.2);
+        margin-bottom: 2rem;
+      }
+      
+      .admin-nav {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+      }
+      
+      .admin-nav-links {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+      }
+      
+      .admin-nav a, .admin-nav button {
+        padding: 0.6rem 1.2rem;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: rgba(255, 255, 255, 0.8);
+        text-decoration: none;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        font-size: 0.9rem;
+        cursor: pointer;
+        font-family: inherit;
+      }
+      
+      .admin-nav a:hover, .admin-nav button:hover {
+        background: rgba(124, 58, 237, 0.2);
+        border-color: rgba(124, 58, 237, 0.4);
+        color: white;
+      }
+      
+      .admin-badge {
+        background: linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(220, 38, 38, 0.2));
+        border: 1px solid rgba(239, 68, 68, 0.4);
+        color: #fca5a5;
+        padding: 0.4rem 0.8rem;
+        border-radius: 6px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="container header-inner">
+        <a class="logo" href="admin_dashboard.html">Admin Panel</a>
+        <nav class="nav">
+          <a href="admin_dashboard.html">Dashboard</a>
+          <a href="admin_inventory.html" class="active">Inventory</a>
+          <a href="inventory.html" target="_blank">View Public</a>
+        </nav>
+      </div>
+    </header>
+
+    <div class="admin-header">
+      <div class="container">
+        <div class="admin-nav">
+          <div class="admin-nav-links">
+            <a href="admin_dashboard.html">← Back to Dashboard</a>
+            <span class="admin-badge">Admin Mode</span>
+          </div>
+          <button onclick="logout()">Logout</button>
+        </div>
+      </div>
+    </div>
+
+    <main>
+      <section class="hero-inventory">
+        <div class="container">
+          <div class="hero-badge">🔧 Admin Management</div>
+          <h1>Manage Hardware Inventory</h1>
+          <p>Add, edit, and delete hardware items. Changes will be reflected on the public inventory page.</p>
+        </div>
+      </section>
+
+      <section class="container inventory-section">
+        <div class="section-header">
+          <div class="section-title-wrapper">
+            <h2>Hardware Items</h2>
+            <p class="section-subtitle">Manage your Arduino components inventory</p>
+          </div>
+          <button class="btn" id="addItemBtn">
+            <span class="btn-icon">+</span>
+            <span>Add New Item</span>
+          </button>
+        </div>
+
+        <div class="inventory-grid" id="inventoryGrid">
+          <!-- Hardware items will be dynamically added here -->
+        </div>
+
+        <!-- Empty state -->
+        <div class="empty-state" id="emptyState">
+          <div class="empty-icon">📦</div>
+          <h3>No Hardware Items Yet</h3>
+          <p>Start building your inventory by adding your first Arduino component!</p>
+          <button class="btn empty-state-btn" onclick="document.getElementById('addItemBtn').click()">
+            <span class="btn-icon">+</span>
+            <span>Add Your First Item</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- Add Item Modal -->
+      <div class="modal" id="addItemModal">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h2>Add New Hardware Item</h2>
+            <button class="close-btn" id="closeModalBtn">&times;</button>
+          </div>
+          <form class="add-form" id="addForm">
+            <div class="form-group">
+              <label for="itemName">Item Name *</label>
+              <input
+                id="itemName"
+                name="name"
+                type="text"
+                placeholder="e.g., Arduino Uno"
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="itemQuantity">Quantity *</label>
+              <input
+                id="itemQuantity"
+                name="quantity"
+                type="number"
+                min="1"
+                value="1"
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="itemDescription">Description</label>
+              <textarea
+                id="itemDescription"
+                name="description"
+                placeholder="e.g., Microcontroller board with USB connection"
+                rows="3"
+              ></textarea>
+            </div>
+
+            <div class="form-group">
+              <label for="itemImage">Image *</label>
+              <p class="help-text">Upload an image of your hardware (JPG, PNG)</p>
+              <div class="image-upload-area" id="imageUploadArea">
+                <input
+                  id="itemImage"
+                  name="image"
+                  type="file"
+                  accept="image/*"
+                  required
+                />
+                <p>Click to upload or drag and drop</p>
+              </div>
+              <img id="imagePreview" alt="Preview" style="display: none" />
+            </div>
+
+            <div class="form-actions">
+              <button class="btn" type="submit">Add Item</button>
+              <button class="btn-outline" type="button" id="cancelBtn">Cancel</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Edit Item Modal -->
+      <div class="modal" id="editItemModal">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h2>Edit Hardware Item</h2>
+            <button class="close-btn" id="closeEditModalBtn">&times;</button>
+          </div>
+          <form class="edit-form" id="editForm">
+            <input type="hidden" id="editItemId" name="id" />
+            
+            <div class="form-group">
+              <label for="editItemName">Item Name *</label>
+              <input
+                id="editItemName"
+                name="name"
+                type="text"
+                placeholder="e.g., Arduino Uno"
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="editItemQuantity">Quantity *</label>
+              <input
+                id="editItemQuantity"
+                name="quantity"
+                type="number"
+                min="1"
+                value="1"
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="editItemDescription">Description</label>
+              <textarea
+                id="editItemDescription"
+                name="description"
+                placeholder="e.g., Microcontroller board with USB connection"
+                rows="3"
+              ></textarea>
+            </div>
+
+            <div class="form-group">
+              <label for="editItemImage">Image</label>
+              <p class="help-text">Upload a new image to replace the current one (optional)</p>
+              <div class="image-upload-area" id="editImageUploadArea">
+                <input
+                  id="editItemImage"
+                  name="image"
+                  type="file"
+                  accept="image/*"
+                />
+                <p>Click to upload or drag and drop</p>
+              </div>
+              <img id="editImagePreview" alt="Preview" style="display: none" />
+              <p class="help-text" id="currentImageText" style="margin-top: 10px;">Current image will be kept if not changed</p>
+            </div>
+
+            <div class="form-actions">
+              <button class="btn" type="submit">Save Changes</button>
+              <button class="btn-outline" type="button" id="cancelEditBtn">Cancel</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-inner">
+        <p>© <span id="year"></span> Sadman. Admin Inventory Management.</p>
+      </div>
+    </footer>
+
+    <script src="inventory-script.js"></script>
+    <script>
+      function logout() {
+        if (confirm('Are you sure you want to logout?')) {
+          localStorage.removeItem('admin_username');
+          localStorage.removeItem('admin_email');
+          window.location.href = 'admin_login.php';
+        }
+      }
+    </script>
+  </body>
+</html>
