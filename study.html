@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Sadman — Study</title>
+    <meta name="description" content="Study sections: add topics with links, descriptions, and blogs." />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="container header-inner">
+        <a class="logo" href="user.html">Sadman</a>
+        <nav class="nav">
+          <a href="user.html#about">About</a>
+          <a href="user.html#projects">Projects</a>
+          <a href="analytics.html">Analytics</a>
+          <a href="user.html#skills">Skills</a>
+          <a href="user.html#contact">Contact</a>
+          <a href="inventory.html">Inventory</a>
+          <a href="study.html" aria-current="page">Study</a>
+        </nav>
+        <a class="btn-outline" href="index.html#contact">Hire Me</a>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div class="container hero-grid">
+          <div class="hero-text">
+            <h1>Study — Downloads</h1>
+            <p class="lead">Browse sections and download study items. Content managed via Admin.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="section container" aria-live="polite">
+        <div id="sections-container" class="panel-grid"></div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-inner">
+        <p>© <span id="year"></span> Your Name. Built with care.</p>
+        <nav class="footer-nav">
+          <a href="user.html">Portfolio</a>
+          <a href="#">Top</a>
+        </nav>
+      </div>
+    </footer>
+
+    <script>
+      document.getElementById('year').textContent = new Date().getFullYear();
+      const sectionsContainer = document.getElementById('sections-container');
+
+      async function fetchSections(){
+        try{
+          const r = await fetch('get_study_sections.php');
+          const d = await r.json();
+          console.log('Sections:', d);
+          return d.success ? d.sections : [];
+        }catch(e){
+          console.error('Fetch sections error:', e);
+          return [];
+        }
+      }
+
+      async function fetchItems(sectionId){
+        try{
+          const r = await fetch('get_study_items.php?section_id=' + encodeURIComponent(sectionId));
+          const d = await r.json();
+          return d.success ? d.items : [];
+        }catch(e){
+          console.error('Fetch items error:', e);
+          return [];
+        }
+      }
+
+      async function render(){
+        const sections = await fetchSections();
+        if(!sections.length){
+          sectionsContainer.innerHTML = '<p class="muted-text" style="padding:.5rem 0">No sections published yet.</p>';
+          return;
+        }
+
+        const cards = [];
+        for(const s of sections){
+          const items = await fetchItems(s.id);
+          const itemsHtml = items.length ? items.map(it => {
+            let links = [];
+            try{ links = it.links_json ? JSON.parse(it.links_json) : []; }catch(e){ links = []; }
+            const linkTags = links.map(l => `<a href="${l}" download target="_blank">Download</a>`).join(' ');
+            return `
+              <li class="list-row">
+                <div>
+                  <strong>${it.title}</strong>
+                  ${it.description ? `<p class="muted-text">${it.description}</p>` : ''}
+                  ${linkTags ? `<p class="project-links">${linkTags}</p>` : '<p class="muted-text">No downloads</p>'}
+                </div>
+              </li>`;
+          }).join('') : '<li class="list-row muted-text">No items in this section</li>';
+
+          cards.push(`
+            <article class="panel">
+              <div class="panel-header">
+                <div>
+                  <p class="eyebrow">Section</p>
+                  <h3>${s.name}</h3>
+                </div>
+              </div>
+              <ul class="list">${itemsHtml}</ul>
+            </article>`);
+        }
+        sectionsContainer.innerHTML = cards.join('');
+      }
+
+      window.addEventListener('DOMContentLoaded', render);
+    </script>
+  </body>
+</html>

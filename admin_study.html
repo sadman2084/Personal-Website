@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Manage Study — Admin Dashboard</title>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;background:#f5f7fa;color:#333}
+    header{background:white;box-shadow:0 2px 8px rgba(0,0,0,0.1);padding:20px 30px;display:flex;justify-content:space-between;align-items:center}
+    header h1{font-size:1.5rem;color:#667eea}
+    .header-right{display:flex;gap:15px}
+    .back-btn,.logout-btn{padding:10px 20px;border:none;border-radius:6px;cursor:pointer;font-weight:600;transition:all .3s ease}
+    .back-btn{background:#f0f0f0;color:#333}
+    .back-btn:hover{background:#e0e0e0}
+    .logout-btn{background:#ff6b6b;color:white}
+    .logout-btn:hover{background:#ff5252}
+    .container{max-width:1200px;margin:0 auto;padding:30px 20px}
+    .panel{background:white;padding:25px;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,0.1);margin-bottom:20px}
+    .panel h2{font-size:1.3rem;margin-bottom:10px;color:#667eea}
+    .list{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:.75rem}
+    .list-row{display:flex;justify-content:space-between;gap:.75rem;padding:.5rem 0;border-bottom:1px solid #eee}
+    label{display:block;margin-bottom:6px;color:#333;font-weight:500}
+    input[type=text],input[type=url],textarea{width:100%;padding:12px 15px;border:2px solid #e0e0e0;border-radius:8px;font-size:1rem;transition:border-color .3s ease}
+    input[type=text]:focus,input[type=url]:focus,textarea:focus{outline:none;border-color:#667eea}
+    textarea{resize:vertical;min-height:100px}
+    .form-actions{display:flex;gap:10px;margin-top:10px}
+    .btn{padding:10px 16px;border:none;border-radius:8px;font-size:.95rem;font-weight:600;cursor:pointer;transition:all .3s ease}
+    .btn-primary{background:#667eea;color:white}
+    .btn-primary:hover{background:#5568d3}
+    .btn-light{background:#f0f0f0;color:#333}
+    .btn-light:hover{background:#e0e0e0}
+    .links-group{display:flex;flex-direction:column;gap:.5rem}
+  </style>
+</head>
+<body>
+  <header>
+    <h1>📚 Manage Study</h1>
+    <div class="header-right">
+      <button class="back-btn" onclick="goBack()">← Back to Dashboard</button>
+      <button class="logout-btn" onclick="logout()">Logout</button>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="panel">
+      <h2>Create Section</h2>
+      <form id="section-form">
+        <label for="section-name">Section name</label>
+        <input type="text" id="section-name" required placeholder="e.g., Web Fundamentals" />
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary">Add Section</button>
+          <button type="reset" class="btn btn-light">Reset</button>
+        </div>
+      </form>
+    </div>
+
+    <div id="sections-container"></div>
+  </div>
+
+  <script>
+    async function fetchSections(){ try{ const r=await fetch('get_study_sections.php'); const d=await r.json(); return d.success?d.sections:[]; }catch(e){ return []; } }
+    async function fetchItems(sectionId){ try{ const r=await fetch('get_study_items.php?section_id='+encodeURIComponent(sectionId)); const d=await r.json(); return d.success?d.items:[]; }catch(e){ return []; } }
+    async function addSection(name){ const r=await fetch('add_study_section.php',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name})}); return r.json(); }
+    async function deleteSection(id){ const r=await fetch('delete_study_section.php',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id})}); return r.json(); }
+    async function addItem(payload){ const r=await fetch('add_study_item.php',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}); return r.json(); }
+    async function deleteItem(id){ const r=await fetch('delete_study_item.php',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id})}); return r.json(); }
+
+    function renderSectionCard(section, items){
+      const itemsHtml = items.length ? items.map(it => {
+        let links = [];
+        try{ links = it.links_json ? JSON.parse(it.links_json) : []; }catch(e){ links = []; }
+        const linkTags = links.map(l=>`<span style=\"display:inline-block;margin-right:.35rem;background:#f0f0f0;color:#667eea;border-radius:4px;padding:4px 8px\">${l}</span>`).join('');
+        return `
+          <li class=\"list-row\">
+            <div style=\"flex:1\">
+              <strong>${it.title}</strong>
+              ${it.description ? `<p style=\"color:#666;margin:.25rem 0\">${it.description}</p>` : ''}
+              ${linkTags ? `<div style=\"margin-top:.25rem\">${linkTags}</div>` : ''}
+            </div>
+            <div style=\"display:flex;gap:.5rem\">
+              <button class=\"btn btn-light\" data-action=\"delete-item\" data-id=\"${it.id}\">Delete</button>
+            </div>
+          </li>`;
+      }).join('') : '<li class="list-row"><span style="color:#999">No items yet.</span></li>';
+
+      return `
+        <div class=\"panel\" data-section-id=\"${section.id}\">
+          <div style=\"display:flex;justify-content:space-between;align-items:center;margin-bottom:10px\">
+            <div>
+              <h2 style=\"margin:0\">${section.name}</h2>
+              <p style=\"color:#999;margin:.2rem 0 0 0\">Add study items below</p>
+            </div>
+            <div>
+              <button class=\"btn btn-light\" data-action=\"delete-section\">Delete Section</button>
+            </div>
+          </div>
+
+          <form class=\"item-form\">
+            <div style=\"display:grid;grid-template-columns:1fr 1fr;gap:12px\">
+              <div>
+                <label>Topic name</label>
+                <input type=\"text\" name=\"title\" required placeholder=\"e.g., CSS Grid\" />
+              </div>
+              <div>
+                <label>Blog link (optional)</label>
+                <input type=\"url\" name=\"blog_link\" placeholder=\"https://yourblog.com/post\" />
+              </div>
+            </div>
+            <div>
+              <label>Description (optional)</label>
+              <textarea name=\"description\" placeholder=\"Short description\"></textarea>
+            </div>
+            <div>
+              <label>Download Links (URLs)</label>
+              <div class=\"links-group\">
+                <input type=\"url\" name=\"links[]\" placeholder=\"https://example.com/file.pdf\" />
+              </div>
+              <div class=\"form-actions\">
+                <button type=\"button\" class=\"btn btn-light\" data-action=\"add-link\">Add Link</button>
+              </div>
+            </div>
+            <div class=\"form-actions\">
+              <button type=\"submit\" class=\"btn btn-primary\">Add Item</button>
+              <button type=\"reset\" class=\"btn btn-light\">Reset</button>
+            </div>
+          </form>
+
+          <ul class=\"list\">${itemsHtml}</ul>
+        </div>`;
+    }
+
+    async function render(){
+      const container = document.getElementById('sections-container');
+      const sections = await fetchSections();
+      if(!sections.length){ container.innerHTML = '<div class="panel"><p style="color:#999">No sections yet. Create one above.</p></div>'; return; }
+      const cards = await Promise.all(sections.map(async s => renderSectionCard(s, await fetchItems(s.id))));
+      container.innerHTML = cards.join('');
+    }
+
+    document.getElementById('section-form').addEventListener('submit', async (e)=>{
+      e.preventDefault();
+      const name = document.getElementById('section-name').value.trim();
+      if(!name) return;
+      const r = await addSection(name);
+      if(r.success){ document.getElementById('section-form').reset(); render(); }
+      else { alert(r.message || 'Failed to add section'); }
+    });
+
+    document.getElementById('sections-container').addEventListener('click', async (e)=>{
+      const card = e.target.closest('[data-section-id]');
+      if(!card) return;
+      const id = parseInt(card.getAttribute('data-section-id'));
+      const action = e.target.getAttribute('data-action');
+      if(action === 'delete-section'){
+        if(confirm('Delete this section?')){ const r = await deleteSection(id); if(r.success) render(); else alert(r.message || 'Failed'); }
+      }
+      if(action === 'add-link'){
+        const group = card.querySelector('.links-group');
+        const input = document.createElement('input'); input.type='url'; input.name='links[]'; input.placeholder='https://example.com/file.pdf'; group.appendChild(input);
+      }
+      if(action === 'delete-item'){
+        const itemId = parseInt(e.target.getAttribute('data-id')); if(!itemId) return; if(confirm('Delete this item?')){ const r = await deleteItem(itemId); if(r.success) render(); else alert(r.message || 'Failed'); }
+      }
+    });
+
+    document.getElementById('sections-container').addEventListener('submit', async (e)=>{
+      const form = e.target.closest('.item-form'); if(!form) return; e.preventDefault();
+      const card = e.target.closest('[data-section-id]'); const section_id = parseInt(card.getAttribute('data-section-id'));
+      const links = Array.from(form.querySelectorAll('input[name="links[]"]')).map(i=>i.value.trim()).filter(Boolean);
+      const payload = {
+        section_id,
+        title: form.elements.title.value.trim(),
+        description: form.elements.description.value.trim(),
+        blog_link: form.elements.blog_link.value.trim(),
+        links,
+        is_active: 1
+      };
+      const r = await addItem(payload);
+      if(r.success){ form.reset(); render(); } else { alert(r.message || 'Failed to add item'); }
+    });
+
+    window.addEventListener('DOMContentLoaded', render);
+
+    function goBack(){ window.location.href = 'admin_dashboard.html'; }
+    function logout(){ if(confirm('Logout?')){ localStorage.clear(); window.location.href = 'login.html'; } }
+  </script>
+</body>
+</html>

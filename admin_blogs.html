@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Manage Blogs — Admin Dashboard</title>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;background:#f5f7fa;color:#333}
+    header{background:white;box-shadow:0 2px 8px rgba(0,0,0,0.1);padding:20px 30px;display:flex;justify-content:space-between;align-items:center}
+    header h1{font-size:1.5rem;color:#667eea}
+    .header-right{display:flex;gap:15px}
+    .back-btn,.logout-btn{padding:10px 20px;border:none;border-radius:6px;cursor:pointer;font-weight:600;transition:all .3s ease}
+    .back-btn{background:#f0f0f0;color:#333}
+    .back-btn:hover{background:#e0e0e0}
+    .logout-btn{background:#ff6b6b;color:white}
+    .logout-btn:hover{background:#ff5252}
+    .container{max-width:1200px;margin:0 auto;padding:30px 20px}
+    .form-card{background:white;padding:30px;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,0.1);margin-bottom:40px}
+    .form-card h2{font-size:1.3rem;margin-bottom:20px;color:#667eea}
+    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+    .form-grid.full{grid-template-columns:1fr}
+    .form-group{margin-bottom:20px}
+    label{display:block;margin-bottom:8px;color:#333;font-weight:500;font-size:.95rem}
+    input[type=text],textarea{width:100%;padding:12px 15px;border:2px solid #e0e0e0;border-radius:8px;font-size:1rem;font-family:inherit;transition:border-color .3s ease}
+    input[type=text]:focus,textarea:focus{outline:none;border-color:#667eea}
+    textarea{resize:vertical;min-height:140px}
+    .form-actions{display:flex;gap:10px;margin-top:25px}
+    .btn{padding:12px 24px;border:none;border-radius:8px;font-size:1rem;font-weight:600;cursor:pointer;transition:all .3s ease}
+    .btn-primary{background:#667eea;color:white}
+    .btn-primary:hover{background:#5568d3}
+    .btn-secondary{background:#f0f0f0;color:#333}
+    .btn-secondary:hover{background:#e0e0e0}
+    .message{padding:15px;border-radius:8px;margin-bottom:20px;display:none;font-weight:500}
+    .message.success{background:#d4edda;color:#155724;border:1px solid #c3e6cb;display:block}
+    .message.error{background:#f8d7da;color:#721c24;border:1px solid #f5c6cb;display:block}
+    .blogs-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(350px,1fr));gap:20px}
+    .blog-card{background:white;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,0.1);overflow:hidden;transition:transform .3s ease}
+    .blog-card:hover{transform:translateY(-5px)}
+    .blog-body{padding:20px}
+    .blog-body h3{font-size:1.2rem;margin-bottom:8px;color:#333}
+    .blog-body p{color:#666;font-size:.95rem;margin-bottom:12px;line-height:1.5}
+    @media(max-width:768px){header{flex-direction:column;gap:15px} .form-grid{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+  <header>
+    <h1>📝 Manage Blogs</h1>
+    <div class="header-right">
+      <button class="back-btn" onclick="goBack()">← Back to Dashboard</button>
+      <button class="logout-btn" onclick="logout()">Logout</button>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="form-card">
+      <h2>Add New Blog</h2>
+      <div id="message" class="message"></div>
+      <form id="blog-form">
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="title">Title</label>
+            <input type="text" id="title" name="title" placeholder="e.g., Understanding CSS Grid" required />
+          </div>
+          <div class="form-group">
+            <label for="slug">Slug (optional)</label>
+            <input type="text" id="slug" name="slug" placeholder="e.g., understanding-css-grid" />
+          </div>
+        </div>
+        <div class="form-group full">
+          <label for="content">Content</label>
+          <textarea id="content" name="content" placeholder="Write your blog..." required></textarea>
+        </div>
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary" id="submit-btn">Add Blog</button>
+          <button type="reset" class="btn btn-secondary">Clear</button>
+        </div>
+      </form>
+    </div>
+
+    <h2 style="margin:0 0 20px 0;color:#333">Your Blogs</h2>
+    <div id="blogs-container" class="blogs-grid">
+      <div class="blog-card"><div class="blog-body"><p>No blogs yet. Create your first blog above!</p></div></div>
+    </div>
+  </div>
+
+  <script>
+    window.addEventListener('DOMContentLoaded', () => { loadBlogs(); });
+
+    async function loadBlogs(){
+      try{
+        const r = await fetch('get_blogs.php');
+        const d = await r.json();
+        const c = document.getElementById('blogs-container');
+        if(d.success && d.blogs.length){
+          c.innerHTML = d.blogs.map(b => `
+            <div class="blog-card">
+              <div class="blog-body">
+                <h3>${b.title}</h3>
+                <p class="muted">Slug: ${b.slug}</p>
+                <div style="display:flex;gap:8px;margin-top:8px">
+                  <a href="blogs.html?id=${b.id}" target="_blank" class="btn btn-secondary" style="text-decoration:none;display:inline-block">View</a>
+                </div>
+              </div>
+            </div>
+          `).join('');
+        } else {
+          c.innerHTML = '<div class="blog-card"><div class="blog-body"><p>No blogs yet. Create your first blog above!</p></div></div>';
+        }
+      }catch(e){
+        showMessage('Failed to load blogs', 'error');
+      }
+    }
+
+    document.getElementById('blog-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const payload = {
+        title: document.getElementById('title').value.trim(),
+        slug: document.getElementById('slug').value.trim(),
+        content: document.getElementById('content').value.trim(),
+        published: 1
+      };
+      try{
+        const r = await fetch('add_blog.php', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload)});
+        const d = await r.json();
+        if(d.success){
+          showMessage('Blog saved successfully!', 'success');
+          (document.getElementById('blog-form')).reset();
+          setTimeout(loadBlogs, 1000);
+        } else {
+          showMessage(d.message || 'Failed to save blog', 'error');
+        }
+      }catch(err){
+        showMessage('An error occurred', 'error');
+      }
+    });
+
+    function showMessage(text, type){
+      const m = document.getElementById('message');
+      m.textContent = text;
+      m.className = 'message ' + type;
+    }
+
+    function goBack(){ window.location.href = 'admin_dashboard.html'; }
+    function logout(){ if(confirm('Logout?')) { localStorage.clear(); window.location.href = 'login.html'; } }
+  </script>
+</body>
+</html>

@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Sadman — Blogs</title>
+    <meta name="description" content="Browse blog topics and read posts." />
+    <link rel="stylesheet" href="style.css" />
+    <style>
+      .layout{display:grid;grid-template-columns:280px 1fr;gap:1rem}
+      .sidebar{background:var(--card);border:1px solid rgba(255,255,255,0.03);border-radius:12px;padding:1rem;height:100%}
+      .sidebar h3{margin:.2rem 0 1rem 0}
+      .topic-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:.35rem}
+      .topic-list a{display:flex;justify-content:space-between;gap:.5rem;padding:.5rem .6rem;border-radius:8px;color:var(--text);text-decoration:none;border:1px solid rgba(255,255,255,0.05)}
+      .topic-list a:hover{background:rgba(255,255,255,0.06)}
+      .content{background:var(--card);border:1px solid rgba(255,255,255,0.03);border-radius:12px;padding:1rem}
+      .content h2{margin:.2rem 0 1rem 0}
+      .empty{color:var(--muted)}
+      @media(max-width:880px){.layout{grid-template-columns:1fr}}
+    </style>
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="container header-inner">
+        <a class="logo" href="user.html">Sadman</a>
+        <nav class="nav">
+          <a href="user.html#about">About</a>
+          <a href="user.html#projects">Projects</a>
+          <a href="analytics.html">Analytics</a>
+          <a href="user.html#skills">Skills</a>
+          <a href="user.html#contact">Contact</a>
+          <a href="inventory.html">Inventory</a>
+          <a href="study.html">Study</a>
+          <a href="blogs.html" aria-current="page">Blogs</a>
+        </nav>
+        <a class="btn-outline" href="index.html#contact">Hire Me</a>
+      </div>
+    </header>
+
+    <main class="section">
+      <div class="container layout">
+        <aside class="sidebar">
+          <h3>Blog Topics</h3>
+          <ul id="topics" class="topic-list"><li class="empty">Loading...</li></ul>
+        </aside>
+        <article class="content" id="content">
+          <p class="empty">Select a blog from the left to read.</p>
+        </article>
+      </div>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-inner">
+        <p>© <span id="year"></span> Your Name. Built with care.</p>
+        <nav class="footer-nav">
+          <a href="user.html">Portfolio</a>
+          <a href="#">Top</a>
+        </nav>
+      </div>
+    </footer>
+
+    <script>
+      document.getElementById('year').textContent = new Date().getFullYear();
+
+      function getParam(name){
+        const url = new URL(window.location.href);
+        return url.searchParams.get(name);
+      }
+
+      async function loadTopics(){
+        const list = document.getElementById('topics');
+        try{
+          const r = await fetch('get_blogs.php');
+          const d = await r.json();
+          if(d.success && d.blogs.length){
+            list.innerHTML = d.blogs.map(b => `
+              <li>
+                <a href="blogs.html?id=${b.id}">
+                  <span>${b.title}</span>
+                  <span class="muted-text" style="font-size:.8rem">${new Date(b.created_at).toLocaleDateString()}</span>
+                </a>
+              </li>
+            `).join('');
+          } else {
+            list.innerHTML = '<li class="empty">No blogs available</li>';
+          }
+        }catch(e){
+          list.innerHTML = '<li class="empty">Failed to load topics</li>';
+        }
+      }
+
+      async function loadContent(){
+        const id = getParam('id');
+        const slug = getParam('slug');
+        const c = document.getElementById('content');
+        if(!id && !slug){ c.innerHTML = '<p class="empty">Select a blog from the left to read.</p>'; return; }
+        const query = id ? ('?id=' + encodeURIComponent(id)) : ('?slug=' + encodeURIComponent(slug));
+        try{
+          const r = await fetch('get_blog.php' + query);
+          const d = await r.json();
+          if(d.success){
+            const b = d.blog;
+            c.innerHTML = `
+              <h2>${b.title}</h2>
+              <div class="muted-text" style="margin-bottom:1rem">Published ${new Date(b.created_at).toLocaleString()}</div>
+              <div>${b.content}</div>
+            `;
+          } else {
+            c.innerHTML = '<p class="empty">' + (d.message || 'Not found') + '</p>';
+          }
+        }catch(e){
+          c.innerHTML = '<p class="empty">Failed to load blog</p>';
+        }
+      }
+
+      window.addEventListener('DOMContentLoaded', async () => {
+        await loadTopics();
+        await loadContent();
+      });
+    </script>
+  </body>
+  </html>

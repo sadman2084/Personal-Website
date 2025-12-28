@@ -114,3 +114,40 @@ h2{margin:0 0 1rem 0}
   .header-inner{gap:.5rem}
   .hero-text h1{font-size:1.6rem}
 }
+
+/* Study forms: beautiful textboxes */
+.panel .list-row input,
+.panel .list-row textarea,
+#section-form input{
+  width:100%;
+  padding:.7rem .85rem;
+  border-radius:10px;
+  border:1px solid rgba(255,255,255,0.08);
+  background:rgba(255,255,255,0.04);
+  color:var(--text);
+  transition:border-color .2s ease, box-shadow .2s ease, background .2s ease;
+}
+
+.panel .list-row input::placeholder,
+.panel .list-row textarea::placeholder,
+#section-form input::placeholder{ color:var(--muted) }
+
+.panel .list-row input:hover,
+.panel .list-row textarea:hover,
+#section-form input:hover{
+  border-color:rgba(255,255,255,0.14);
+  background:rgba(255,255,255,0.06);
+}
+
+.panel .list-row input:focus,
+.panel .list-row textarea:focus,
+#section-form input:focus{
+  outline:none;
+  border-color:var(--accent);
+  background:rgba(124,58,237,0.10);
+  box-shadow:0 0 0 3px rgba(124,58,237,0.35), 0 10px 30px rgba(2,6,23,0.45);
+}
+
+/* Links group for multiple URLs */
+.links-group{width:100%}
+.links-group input{width:100%}
