@@ -1,6 +1,4 @@
 // Authentication Manager for Supabase
-const supabase = window.supabase;
-
 class AuthManager {
   constructor() {
     this.currentUser = null;
@@ -8,9 +6,19 @@ class AuthManager {
     this.initAuth();
   }
 
+  // Get supabase instance
+  get supabase() {
+    return window.supabase;
+  }
+
   // Initialize authentication listener
   initAuth() {
-    supabase.auth.onAuthStateChange((event, session) => {
+    if (!this.supabase) {
+      console.error('Supabase client not initialized');
+      return;
+    }
+    
+    this.supabase.auth.onAuthStateChange((event, session) => {
       if (session) {
         this.currentUser = session.user;
         this.loadAdminProfile();
@@ -24,7 +32,7 @@ class AuthManager {
   // Load admin profile from database
   async loadAdminProfile() {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await this.supabase
         .from('admins')
         .select('*')
         .eq('email', this.currentUser.email)
@@ -43,7 +51,7 @@ class AuthManager {
   // Login with email and password
   async login(email, password) {
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await this.supabase.auth.signInWithPassword({
         email,
         password
       });
@@ -62,7 +70,7 @@ class AuthManager {
   // Register new admin
   async register(email, password, username) {
     try {
-      const { data, error } = await supabase.auth.signUp({
+      const { data, error } = await this.supabase.auth.signUp({
         email,
         password
       });
@@ -72,7 +80,7 @@ class AuthManager {
       }
 
       // Insert admin record
-      const { error: insertError } = await supabase
+      const { error: insertError } = await this.supabase
         .from('admins')
         .insert([{
           email,
@@ -93,7 +101,7 @@ class AuthManager {
   // Logout current user
   async logout() {
     try {
-      const { error } = await supabase.auth.signOut();
+      const { error } = await this.supabase.auth.signOut();
 
       if (error) {
         return { success: false, message: error.message };
@@ -130,7 +138,7 @@ class AuthManager {
         return { success: false, message: 'Not logged in' };
       }
 
-      const { error } = await supabase
+      const { error } = await this.supabase
         .from('admins')
         .update(updates)
         .eq('id', this.currentAdmin.id);
@@ -150,7 +158,7 @@ class AuthManager {
   // Reset password
   async resetPassword(email) {
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      const { error } = await this.supabase.auth.resetPasswordForEmail(email, {
         redirectTo: `${window.location.origin}/reset-password`
       });
 
@@ -165,5 +173,10 @@ class AuthManager {
   }
 }
 
-// Create global auth manager instance
-window.authManager = new AuthManager();
+// Create global auth manager instance after DOM is loaded
+if (typeof window !== 'undefined') {
+  // Wait a short moment to ensure supabase client is initialized
+  setTimeout(() => {
+    window.authManager = new AuthManager();
+  }, 100);
+}
