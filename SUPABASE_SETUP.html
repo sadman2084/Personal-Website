@@ -1,0 +1,383 @@
+<!-- SUPABASE SETUP INSTRUCTIONS -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supabase Setup Guide</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        h1 { color: #333; }
+        h2 {
+            color: #555;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
+            margin-top: 30px;
+        }
+        .step {
+            background: #f8f9fa;
+            padding: 15px;
+            margin: 15px 0;
+            border-left: 4px solid #007bff;
+            border-radius: 4px;
+        }
+        code {
+            background: #f1f1f1;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            color: #d63384;
+        }
+        pre {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+        .warning {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+        .success {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        th, td {
+            text-align: left;
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background: #007bff;
+            color: white;
+        }
+        tr:hover {
+            background: #f5f5f5;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Supabase Setup & Migration Guide</h1>
+
+        <h2>1. Get Your Supabase Credentials</h2>
+        <div class="step">
+            <p><strong>Go to:</strong> <code>https://app.supabase.com/project/[your-project-id]/settings/api</code></p>
+            <p>You'll find:</p>
+            <ul>
+                <li><strong>Project URL:</strong> Copy this (e.g., https://xxxx.supabase.co)</li>
+                <li><strong>Anon Public Key:</strong> Copy this (starts with eyJ...)</li>
+            </ul>
+        </div>
+
+        <h2>2. Update supabase-config.js</h2>
+        <div class="step">
+            <p>Open <code>supabase-config.js</code> and replace:</p>
+            <pre>const SUPABASE_URL = 'YOUR_SUPABASE_URL';
+const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';</pre>
+
+            <p>With your actual credentials:</p>
+            <pre>const SUPABASE_URL = 'https://your-project.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...';</pre>
+        </div>
+
+        <h2>3. Include Scripts in Your HTML</h2>
+        <div class="step">
+            <p>Add these to the <code>&lt;head&gt;</code> or before closing <code>&lt;/body&gt;</code> tag:</p>
+            <pre>&lt;!-- Supabase Client Library --&gt;
+&lt;script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"&gt;&lt;/script&gt;
+
+&lt;!-- Your Config & API --&gt;
+&lt;script src="supabase-config.js"&gt;&lt;/script&gt;
+&lt;script src="auth.js"&gt;&lt;/script&gt;
+&lt;script src="api.js" type="module"&gt;&lt;/script&gt;</pre>
+        </div>
+
+        <h2>4. API Usage Examples</h2>
+
+        <h3>📨 Save a Message (Contact Form)</h3>
+        <pre>import { saveMessage } from './api.js';
+
+async function handleContactForm(e) {
+    e.preventDefault();
+    
+    const result = await saveMessage({
+        name: document.getElementById('name').value,
+        email: document.getElementById('email').value,
+        message: document.getElementById('message').value
+    });
+    
+    if (result.success) {
+        alert(result.message);
+        form.reset();
+    } else {
+        alert('Error: ' + result.message);
+    }
+}</pre>
+
+        <h3>🎯 Get All Public Projects</h3>
+        <pre>import { getAllPublicProjects } from './api.js';
+
+async function loadProjects() {
+    const result = await getAllPublicProjects();
+    
+    if (result.success) {
+        console.log('Projects:', result.projects);
+        // Render projects on page
+    }
+}</pre>
+
+        <h3>👤 Get Public Profile</h3>
+        <pre>import { getPublicProfile } from './api.js';
+
+async function loadProfile() {
+    const result = await getPublicProfile();
+    
+    if (result.success) {
+        document.getElementById('profile-name').textContent = result.profile.name;
+        document.getElementById('profile-bio').textContent = result.profile.bio;
+    }
+}</pre>
+
+        <h3>🔐 Login (Admin Only)</h3>
+        <pre>async function handleLogin(e) {
+    e.preventDefault();
+    
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    
+    const result = await window.authManager.login(email, password);
+    
+    if (result.success) {
+        window.location.href = '/admin_dashboard.html';
+    } else {
+        alert('Login failed: ' + result.message);
+    }
+}</pre>
+
+        <h3>➕ Add New Project (Admin)</h3>
+        <pre>import { addProject } from './api.js';
+
+async function handleAddProject(e) {
+    e.preventDefault();
+    
+    const adminId = window.authManager.getAdminId();
+    
+    const result = await addProject(adminId, {
+        title: document.getElementById('title').value,
+        description: document.getElementById('description').value,
+        github_link: document.getElementById('github').value,
+        live_link: document.getElementById('live').value,
+        image_url: document.getElementById('image').value,
+        tech_stack: document.getElementById('tech').value
+    });
+    
+    if (result.success) {
+        alert('Project added!');
+        // Reload projects list
+    }
+}</pre>
+
+        <h3>🗑️ Delete Project (Admin)</h3>
+        <pre>import { deleteProject } from './api.js';
+
+async function handleDeleteProject(projectId) {
+    if (confirm('Are you sure?')) {
+        const result = await deleteProject(projectId);
+        
+        if (result.success) {
+            alert('Project deleted');
+            // Refresh projects list
+        }
+    }
+}</pre>
+
+        <h3>📦 Get Inventory Items</h3>
+        <pre>import { getInventory } from './api.js';
+
+async function loadInventory() {
+    const result = await getInventory();
+    
+    if (result.success) {
+        const items = result.items;
+        // Render inventory table
+        items.forEach(item => {
+            console.log(`${item.name}: ${item.quantity}`);
+        });
+    }
+}</pre>
+
+        <h2>5. Complete Function List</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Function</th>
+                    <th>Parameters</th>
+                    <th>Returns</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>saveMessage(data)</td>
+                    <td>name, email, message</td>
+                    <td>success, message, message_id</td>
+                </tr>
+                <tr>
+                    <td>getMessages(adminId)</td>
+                    <td>adminId</td>
+                    <td>success, messages[]</td>
+                </tr>
+                <tr>
+                    <td>deleteMessage(messageId)</td>
+                    <td>messageId</td>
+                    <td>success, message</td>
+                </tr>
+                <tr>
+                    <td>getAllPublicProjects()</td>
+                    <td>None</td>
+                    <td>success, projects[]</td>
+                </tr>
+                <tr>
+                    <td>addProject(adminId, data)</td>
+                    <td>adminId, project data</td>
+                    <td>success, project</td>
+                </tr>
+                <tr>
+                    <td>deleteProject(projectId)</td>
+                    <td>projectId</td>
+                    <td>success, message</td>
+                </tr>
+                <tr>
+                    <td>getPublicProfile()</td>
+                    <td>None</td>
+                    <td>success, profile</td>
+                </tr>
+                <tr>
+                    <td>updateProfile(adminId, data)</td>
+                    <td>adminId, profile data</td>
+                    <td>success, message</td>
+                </tr>
+                <tr>
+                    <td>getInventory()</td>
+                    <td>None</td>
+                    <td>success, items[]</td>
+                </tr>
+                <tr>
+                    <td>addInventoryItem(data)</td>
+                    <td>item data</td>
+                    <td>success, item</td>
+                </tr>
+                <tr>
+                    <td>deleteInventoryItem(itemId)</td>
+                    <td>itemId</td>
+                    <td>success, message</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h2>6. Authentication Methods</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Method</th>
+                    <th>Usage</th>
+                    <th>Example</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>login(email, password)</td>
+                    <td>Admin login</td>
+                    <td><code>await window.authManager.login(email, pwd)</code></td>
+                </tr>
+                <tr>
+                    <td>register(email, password, username)</td>
+                    <td>Admin registration</td>
+                    <td><code>await window.authManager.register(email, pwd, name)</code></td>
+                </tr>
+                <tr>
+                    <td>logout()</td>
+                    <td>Logout current user</td>
+                    <td><code>await window.authManager.logout()</code></td>
+                </tr>
+                <tr>
+                    <td>isLoggedIn()</td>
+                    <td>Check login status</td>
+                    <td><code>if (window.authManager.isLoggedIn()) { ... }</code></td>
+                </tr>
+                <tr>
+                    <td>getAdminId()</td>
+                    <td>Get current admin ID</td>
+                    <td><code>const id = window.authManager.getAdminId()</code></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h2>7. Important Security Notes</h2>
+        <div class="warning">
+            <strong>⚠️ RLS (Row-Level Security) is Critical!</strong>
+            <p>Set up Row-Level Security policies in Supabase for:</p>
+            <ul>
+                <li><strong>Admin Only:</strong> Only logged-in admins can modify their own data</li>
+                <li><strong>Public Data:</strong> Anyone can read blogs, projects, profiles marked as public</li>
+                <li><strong>Messages:</strong> Only admins can read/delete messages</li>
+            </ul>
+        </div>
+
+        <h2>8. Database Schema Check</h2>
+        <div class="success">
+            <strong>✅ Expected Tables in Supabase:</strong>
+            <ul>
+                <li>admins</li>
+                <li>messages</li>
+                <li>projects</li>
+                <li>profile</li>
+                <li>blogs</li>
+                <li>hardware_inventory</li>
+                <li>study_sections</li>
+                <li>study_items</li>
+            </ul>
+        </div>
+
+        <h2>9. Next Steps</h2>
+        <ol>
+            <li>Add your Supabase URL & Key to <code>supabase-config.js</code></li>
+            <li>Include Supabase scripts in your HTML files</li>
+            <li>Import functions from <code>api.js</code> as needed</li>
+            <li>Test your APIs</li>
+            <li>Push to GitHub!</li>
+        </ol>
+
+        <div class="success">
+            <strong>🎉 You're ready to go!</strong> All PHP files have been removed and replaced with JavaScript Supabase API calls.
+        </div>
+
+    </div>
+</body>
+</html>

@@ -1,8 +1,8 @@
 -- Create database if not exists
-CREATE DATABASE IF NOT EXISTS personal;
+CREATE DATABASE IF NOT EXISTS personalif0_40823515_personal;
 
 -- Use the database
-USE personal;
+USE personalif0_40823515_personal;
 
 -- Create hardware inventory table
 CREATE TABLE IF NOT EXISTS hardware_inventory (
