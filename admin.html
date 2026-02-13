@@ -243,9 +243,14 @@
                 </form>
             </div>
 
-            <a href="login.html" class="back-link">← Back to Home</a>
+            <a href="index.html" class="back-link">← Back to Home</a>
         </div>
     </div>
+
+    <!-- Supabase Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js"></script>
+    <script src="auth.js"></script>
 
     <script>
         // Tab switching
@@ -263,41 +268,47 @@
 
                 // Clear messages
                 document.getElementById('signin-message').textContent = '';
+                document.getElementById('signin-message').className = 'message';
                 document.getElementById('signup-message').textContent = '';
+                document.getElementById('signup-message').className = 'message';
             });
         });
 
         // Sign In Form
         document.getElementById('signin-form').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const email = document.getElementById('signin-email').value;
+            const email = document.getElementById('signin-email').value.trim();
             const password = document.getElementById('signin-password').value;
             const messageDiv = document.getElementById('signin-message');
 
+            messageDiv.textContent = 'Signing in...';
+            messageDiv.className = 'message';
+
             try {
-                const response = await fetch('admin_login.php', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email, password })
-                });
+                const result = await window.authManager.login(email, password);
 
-                const data = await response.json();
-
-                if (data.success) {
+                if (result.success) {
                     messageDiv.textContent = 'Login successful! Redirecting...';
                     messageDiv.className = 'message success';
-                    localStorage.setItem('admin_email', email);
-                    localStorage.setItem('admin_username', data.username || email.split('@')[0]);
-                    localStorage.setItem('admin_id', data.admin_id);
+
+                    // Store admin info
+                    const admin = window.authManager.getAdmin();
+                    if (admin) {
+                        localStorage.setItem('admin_email', admin.email);
+                        localStorage.setItem('admin_username', admin.username);
+                        localStorage.setItem('admin_id', admin.id);
+                    }
+
                     setTimeout(() => {
                         window.location.href = 'admin_dashboard.html';
-                    }, 1500);
+                    }, 1000);
                 } else {
-                    messageDiv.textContent = data.message || 'Login failed. Please try again.';
+                    messageDiv.textContent = result.message || 'Login failed. Please check your credentials.';
                     messageDiv.className = 'message error';
                 }
             } catch (error) {
-                messageDiv.textContent = 'An error occurred. Please try again.';
+                console.error('Login error:', error);
+                messageDiv.textContent = 'An error occurred: ' + error.message;
                 messageDiv.className = 'message error';
             }
         });
@@ -305,8 +316,8 @@
         // Sign Up Form
         document.getElementById('signup-form').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const username = document.getElementById('signup-username').value;
-            const email = document.getElementById('signup-email').value;
+            const username = document.getElementById('signup-username').value.trim();
+            const email = document.getElementById('signup-email').value.trim();
             const password = document.getElementById('signup-password').value;
             const confirm = document.getElementById('signup-confirm').value;
             const messageDiv = document.getElementById('signup-message');
@@ -317,35 +328,37 @@
                 return;
             }
 
+            if (password.length < 6) {
+                messageDiv.textContent = 'Password must be at least 6 characters!';
+                messageDiv.className = 'message error';
+                return;
+            }
+
+            messageDiv.textContent = 'Creating account...';
+            messageDiv.className = 'message';
+
             try {
-                const response = await fetch('admin_register.php', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username, email, password })
-                });
+                const result = await window.authManager.register(email, password, username);
 
-                const data = await response.json();
-
-                if (data.success) {
-                    messageDiv.textContent = 'Account created successfully! Signing you in...';
+                if (result.success) {
+                    messageDiv.textContent = 'Account created! Please check your email to verify your account, then sign in.';
                     messageDiv.className = 'message success';
                     
-                    // Store the newly created admin info
-                    localStorage.setItem('admin_username', data.username);
-                    localStorage.setItem('admin_email', data.email);
-                    localStorage.setItem('admin_id', data.admin_id);
+                    // Clear form
+                    document.getElementById('signup-form').reset();
                     
+                    // Switch to sign in tab after 3 seconds
                     setTimeout(() => {
+                        document.querySelector('[data-tab="signin"]').click();
                         document.getElementById('signin-email').value = email;
-                        document.getElementById('signin-password').value = password;
-                        document.getElementById('signin-form').dispatchEvent(new Event('submit'));
-                    }, 1500);
+                    }, 3000);
                 } else {
-                    messageDiv.textContent = data.message || 'Registration failed. Please try again.';
+                    messageDiv.textContent = result.message || 'Registration failed. Please try again.';
                     messageDiv.className = 'message error';
                 }
             } catch (error) {
-                messageDiv.textContent = 'An error occurred. Please try again.';
+                console.error('Signup error:', error);
+                messageDiv.textContent = 'An error occurred: ' + error.message;
                 messageDiv.className = 'message error';
             }
         });

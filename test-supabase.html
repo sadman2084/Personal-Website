@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supabase Connection Test</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .test-item {
+            padding: 15px;
+            margin: 10px 0;
+            border-left: 4px solid #ccc;
+            background: #f9f9f9;
+            border-radius: 4px;
+        }
+        .test-item.success {
+            border-left-color: #28a745;
+            background: #d4edda;
+        }
+        .test-item.error {
+            border-left-color: #dc3545;
+            background: #f8d7da;
+        }
+        .test-item.pending {
+            border-left-color: #ffc107;
+            background: #fff3cd;
+        }
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        button:hover {
+            background: #5568d3;
+        }
+        pre {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-size: 13px;
+        }
+        .info {
+            background: #e7f3ff;
+            border-left: 4px solid #2196F3;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🧪 Supabase Connection Test</h1>
+        
+        <div class="info">
+            <strong>Before testing:</strong>
+            <ol>
+                <li>Make sure you've added your correct Supabase URL and Anon Key in <code>supabase-config.js</code></li>
+                <li>Your Supabase project should have an <code>admins</code> table with columns: id, user_id, email, username, created_at</li>
+                <li>Enable Email Auth in Supabase: Authentication → Providers → Email (should be ON)</li>
+            </ol>
+        </div>
+
+        <button onclick="runTests()">Run Connection Tests</button>
+
+        <div id="results"></div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js"></script>
+
+    <script>
+        async function runTests() {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '';
+
+            // Test 1: Check if Supabase is loaded
+            addResult('pending', 'Testing Supabase library loaded...');
+            if (typeof supabase === 'undefined') {
+                addResult('error', 'Supabase library not loaded! Check your internet connection.');
+                return;
+            }
+            addResult('success', '✓ Supabase library loaded successfully');
+
+            // Test 2: Check configuration
+            addResult('pending', 'Checking configuration...');
+            if (!window.supabase) {
+                addResult('error', 'Supabase client not initialized! Check supabase-config.js');
+                return;
+            }
+            addResult('success', '✓ Supabase client initialized');
+
+            // Test 3: Check connection
+            addResult('pending', 'Testing database connection...');
+            try {
+                const { data, error } = await window.supabase
+                    .from('admins')
+                    .select('count')
+                    .limit(1);
+
+                if (error) {
+                    addResult('error', `Database connection error: ${error.message}`);
+                    addResult('error', `Hint: Make sure the 'admins' table exists in your Supabase database`);
+                    console.error('Supabase error:', error);
+                } else {
+                    addResult('success', '✓ Database connection successful!');
+                    addResult('success', `✓ 'admins' table exists and is accessible`);
+                }
+            } catch (err) {
+                addResult('error', `Connection test failed: ${err.message}`);
+                return;
+            }
+
+            // Test 4: Check auth configuration
+            addResult('pending', 'Testing authentication setup...');
+            try {
+                const { data: { session }, error } = await window.supabase.auth.getSession();
+                
+                if (error) {
+                    addResult('error', `Auth error: ${error.message}`);
+                } else {
+                    addResult('success', '✓ Authentication system is configured');
+                    if (session) {
+                        addResult('success', `✓ You are currently logged in as: ${session.user.email}`);
+                    } else {
+                        addResult('success', '✓ No active session (you are logged out)');
+                    }
+                }
+            } catch (err) {
+                addResult('error', `Auth test failed: ${err.message}`);
+            }
+
+            // Final result
+            addResult('success', '🎉 All tests completed! Check results above.');
+            addResult('success', 'You can now try signing up/signing in on admin.html');
+        }
+
+        function addResult(type, message) {
+            const resultsDiv = document.getElementById('results');
+            const item = document.createElement('div');
+            item.className = `test-item ${type}`;
+            item.textContent = message;
+            resultsDiv.appendChild(item);
+        }
+    </script>
+</body>
+</html>
